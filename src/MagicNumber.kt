@@ -1,10 +1,11 @@
+import java.math.BigInteger
 import kotlin.math.abs
 import kotlin.math.min
 
 class MagicNumber {
     var children: Long = 1
         set(value) {
-            val gcd = getGCDOfBunsu(value, parent)
+            val gcd = getGCD(value, parent)
             if (gcd > 1) {
                 field = value / gcd
                 parent /= gcd
@@ -14,10 +15,13 @@ class MagicNumber {
         }
     var parent: Long = 1
         set(value) {
+            if (value == 0L) {
+                throw ArithmeticException("Parent must not be 0")
+            }
             if (value < 0) {
                 children *= -1
             }
-            val gcd = getGCDOfBunsu(children, value)
+            val gcd = getGCD(children, value)
             if (gcd > 1) {
                 field = abs(value) / gcd
                 children /= gcd
@@ -26,11 +30,76 @@ class MagicNumber {
             }
         }
 
+    constructor()
+
+    constructor(initValue: Long) {
+        children = initValue
+    }
+
+    constructor(initValue: Int) {
+        children = initValue.toLong()
+    }
+
+    constructor(initValue: Short) {
+        children = initValue.toLong()
+    }
+
+    constructor(initValue: Byte) {
+        children = initValue.toLong()
+    }
+
+    constructor(initValue: BigInteger) {
+        children = initValue.toLong()
+    }
+
+    constructor(child: Long, parent: Long) {
+        children = child
+        this.parent = parent
+    }
+
+    constructor(child: Int, parent: Int) {
+        children = child.toLong()
+        this.parent = parent.toLong()
+    }
+
+    constructor(child: Short, parent: Short) {
+        children = child.toLong()
+        this.parent = parent.toLong()
+    }
+
+    constructor(value: Double) {
+        var value = value
+        var powerCount: Long = 0L
+        do {
+            if (powerCount > 1000) {
+                TODO("무한소수 대응 실패")
+            }
+            value *= 10
+            powerCount++
+            val longValue = value.toLong()
+        } while (longValue.toDouble() != value)
+
+        children = value.toLong()
+        parent = pow(10, powerCount)
+    }
+
     fun getAsDouble(): Double {
         return children.toDouble() / parent.toDouble()
     }
 
-    private fun getGCDOfBunsu(a: Long, b: Long): Long {
+    fun getAsFloat(): Float {
+        return children.toFloat() / parent.toFloat()
+    }
+
+    fun getAsLong(): Long {
+        return children.toLong() / parent
+    }
+
+    fun getAsInt(): Int {
+        return children.toInt() / parent.toInt()
+    }
+
+    private fun getGCD(a: Long, b: Long): Long {
         val startNumber = min(abs(a), abs(b))
         for (i in startNumber downTo 1) {
             if (a % i == 0L && b % i == 0L) {
@@ -40,87 +109,83 @@ class MagicNumber {
         return 1L
     }
 
-    private fun getLCMOfBunsu(a: Long, b: Long): Long {
-        return (a * b) / getGCDOfBunsu(a, b)
+    private fun getLCM(a: Long, b: Long): Long {
+        return (a * b) / getGCD(a, b)
+    }
+
+    private fun pow(under: Long, up: Long): Long {
+        if (up == 0L) {
+            return 1
+        }
+        return pow(under, up - 1) * under
     }
 
     operator fun plus(other: MagicNumber): MagicNumber {
-        if (this.parent == other.parent) {
-            val result = MagicNumber()
-            result.parent = this.parent
-            result.children = this.children + other.children
-            return result
-        }
-        val lcm = getLCMOfBunsu(this.parent, other.parent)
-        val thisChildScaled = this.children * (lcm / this.parent)
-        val otherChildScaled = other.children * (lcm / other.parent)
-        val result = MagicNumber()
-        result.parent = lcm
-        result.children = thisChildScaled + otherChildScaled
-        return result
+        val lcmOfParent = getLCM(this.parent, other.parent)
+        val thisChildScaled = this.children * (lcmOfParent / this.parent)
+        val otherChildScaled = other.children * (lcmOfParent / other.parent)
+        return MagicNumber(thisChildScaled + otherChildScaled, lcmOfParent)
     }
 
     operator fun plus(other: Long): MagicNumber {
         val addChildren = this.parent * other
-        val result = MagicNumber()
-        result.parent = this.parent
-        result.children = this.children + addChildren
-        return result
+        return MagicNumber(this.children + addChildren, this.parent)
+    }
+
+    operator fun plus(other: Double): MagicNumber {
+        return this + MagicNumber(other)
     }
 
     operator fun minus(other: MagicNumber): MagicNumber {
-        if (this.parent == other.parent) {
-            val result = MagicNumber()
-            result.parent = this.parent
-            result.children = this.children - other.children
-            return result
-        }
-        val lcm = getLCMOfBunsu(this.parent, other.parent)
-        val thisScaled = this.children * (lcm / this.parent)
-        val otherScaled = other.children * (lcm / other.parent)
-        val result = MagicNumber()
-        result.parent = lcm
-        result.children = thisScaled - otherScaled
-        return result
+        val lcmOfParent = getLCM(this.parent, other.parent)
+        val thisChildScaled = this.children * (lcmOfParent / this.parent)
+        val otherChildScaled = other.children * (lcmOfParent / other.parent)
+        return MagicNumber(thisChildScaled + otherChildScaled, lcmOfParent)
     }
 
     operator fun minus(other: Long): MagicNumber {
         val subChildren = this.parent * other
-        val result = MagicNumber()
-        result.parent = this.parent
-        result.children = this.children - subChildren
-        return result
+        return MagicNumber(this.children - subChildren, this.parent)
+    }
+
+    operator fun minus(other: Double): MagicNumber {
+        return this - MagicNumber(other)
     }
 
     operator fun times(other: MagicNumber): MagicNumber {
-        val result = MagicNumber()
-        result.parent = this.parent * other.parent
-        result.children = this.children * other.children
-        return result
+        if (other.parent == 0L) {
+            throw ArithmeticException("Parent must not be 0")
+        }
+        return MagicNumber(this.children * other.children, this.parent * other.parent)
     }
 
     operator fun times(other: Long): MagicNumber {
-        val result = MagicNumber()
-        result.parent = this.parent * other
-        result.children = this.children
-        return result
+        return MagicNumber(this.children * other, this.parent)
+    }
+
+    operator fun times(other: Double): MagicNumber {
+        return this * MagicNumber(other)
     }
 
     operator fun div(other: MagicNumber): MagicNumber {
         if (other.children == 0L) {
             throw ArithmeticException("Division by zero is not allowed")
         }
-        val inverse = MagicNumber().apply {
-            parent = other.children
-            children = other.parent
-        }
-        return this * inverse
+        return MagicNumber(other.parent, other.children)
     }
 
     operator fun div(other: Long): MagicNumber {
-        val result = MagicNumber()
-        result.parent = this.parent * other
-        result.children = this.children
-        return result
+        if (other == 0L) {
+            throw ArithmeticException("Division by zero is not allowed")
+        }
+        return MagicNumber(this.children, this.parent * other)
     }
+
+    operator fun div(other: Double): MagicNumber {
+        if (other == 0.0) {
+            throw ArithmeticException("Division by zero is not allowed")
+        }
+        return this / MagicNumber(other)
+    }
+
 }
