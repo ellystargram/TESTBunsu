@@ -171,7 +171,7 @@ class MagicNumber {
         if (other.children == 0L) {
             throw ArithmeticException("Division by zero is not allowed")
         }
-        return MagicNumber(other.parent, other.children)
+        return MagicNumber(this.children * other.parent, this.parent * other.children)
     }
 
     operator fun div(other: Long): MagicNumber {
