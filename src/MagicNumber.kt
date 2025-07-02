@@ -69,7 +69,7 @@ class MagicNumber {
 
     constructor(value: Double) {
         var value = value
-        var powerCount: Long = 0L
+        var powerCount = 0L
         do {
             if (powerCount > 1000) {
                 TODO("무한소수 대응 실패")
@@ -92,7 +92,7 @@ class MagicNumber {
     }
 
     fun getAsLong(): Long {
-        return children.toLong() / parent
+        return children / parent
     }
 
     fun getAsInt(): Int {
