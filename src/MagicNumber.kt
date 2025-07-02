@@ -1,3 +1,4 @@
+import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.math.abs
 import kotlin.math.min
@@ -83,6 +84,58 @@ class MagicNumber {
         parent = pow(10, powerCount)
     }
 
+    constructor(value: Float) {
+        var value = value
+        var powerCount = 0L
+        do {
+            if (powerCount > 1000) {
+                TODO("무한소수 대응 실패")
+            }
+            value *= 10
+            powerCount++
+            val longValue = value.toLong()
+        } while (longValue.toFloat() != value)
+
+        children = value.toLong()
+        parent = pow(10, powerCount)
+    }
+
+    constructor(child: Double, parent: Double) {
+        var varChild = child
+        var varParent = parent
+        var powerCount = 0L
+        do {
+            if (powerCount > 1000) {
+                TODO("무한소수 대응 실패")
+            }
+            varChild *= 10
+            varParent *= 10
+            powerCount++
+            val longChild = varChild.toLong()
+            val longParent = varParent.toLong()
+        } while (longChild.toDouble() != varChild || longParent.toDouble() != varParent)
+        this.children = varChild.toLong()
+        this.parent = varParent.toLong()
+    }
+
+    constructor(child: Float, parent: Float) {
+        var varChild = child
+        var varParent = parent
+        var powerCount = 0L
+        do {
+            if (powerCount > 1000) {
+                TODO("무한소수 대응 실패")
+            }
+            varChild *= 10
+            varParent *= 10
+            powerCount++
+            val longChild = varChild.toLong()
+            val longParent = varParent.toLong()
+        } while (longChild.toFloat() != varChild || longParent.toFloat() != varParent)
+        this.children = varChild.toLong()
+        this.parent = varParent.toLong()
+    }
+
     fun getAsDouble(): Double {
         return children.toDouble() / parent.toDouble()
     }
@@ -132,8 +185,16 @@ class MagicNumber {
         return MagicNumber(this.children + addChildren, this.parent)
     }
 
+    operator fun plus(other: BigInteger): MagicNumber {
+        return this + MagicNumber(other.toLong())
+    }
+
     operator fun plus(other: Double): MagicNumber {
         return this + MagicNumber(other)
+    }
+
+    operator fun plus(other: BigDecimal): MagicNumber {
+        return this + MagicNumber(other.toDouble())
     }
 
     operator fun minus(other: MagicNumber): MagicNumber {
@@ -148,8 +209,16 @@ class MagicNumber {
         return MagicNumber(this.children - subChildren, this.parent)
     }
 
+    operator fun minus(other: BigInteger): MagicNumber {
+        return this - MagicNumber(other.toLong())
+    }
+
     operator fun minus(other: Double): MagicNumber {
         return this - MagicNumber(other)
+    }
+
+    operator fun minus(other: BigDecimal): MagicNumber {
+        return this - MagicNumber(other.toDouble())
     }
 
     operator fun times(other: MagicNumber): MagicNumber {
@@ -163,8 +232,18 @@ class MagicNumber {
         return MagicNumber(this.children * other, this.parent)
     }
 
+    operator fun times(other: BigInteger): MagicNumber {
+        return this * MagicNumber(other.toLong())
+    }
+
     operator fun times(other: Double): MagicNumber {
-        return this * MagicNumber(other)
+        val otherMagicNumber = MagicNumber(other)
+        return this * otherMagicNumber
+    }
+
+    operator fun times(other: BigDecimal): MagicNumber {
+        val otherMagicNumber = MagicNumber(other.toDouble())
+        return this * otherMagicNumber
     }
 
     operator fun div(other: MagicNumber): MagicNumber {
@@ -181,6 +260,13 @@ class MagicNumber {
         return MagicNumber(this.children, this.parent * other)
     }
 
+    operator fun div(other: BigInteger): MagicNumber {
+        if (other.equals(0)){
+            throw ArithmeticException("Division by zero is not allowed")
+        }
+        return this / other.toLong()
+    }
+
     operator fun div(other: Double): MagicNumber {
         if (other == 0.0) {
             throw ArithmeticException("Division by zero is not allowed")
@@ -188,4 +274,10 @@ class MagicNumber {
         return this / MagicNumber(other)
     }
 
+    operator fun div(other: BigDecimal): MagicNumber {
+        if (other.equals(0.0)) {
+            throw ArithmeticException("Division by zero is not allowed")
+        }
+        return this / MagicNumber(other.toDouble())
+    }
 }
