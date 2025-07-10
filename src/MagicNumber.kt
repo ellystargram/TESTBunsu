@@ -4,27 +4,27 @@ import kotlin.math.abs
 import kotlin.math.min
 
 class MagicNumber {
-    var children: Long = 1
+    var children: BigInteger = BigInteger.ONE
         set(value) {
-            val gcd = getGCD(value, parent)
-            if (gcd > 1) {
+            val gcd = value.gcd(parent)
+            if (gcd > BigInteger.ONE) {
                 field = value / gcd
                 parent /= gcd
             } else {
                 field = value
             }
         }
-    var parent: Long = 1
+    var parent: BigInteger = BigInteger.ONE
         set(value) {
-            if (value == 0L) {
+            if (value == BigInteger.ZERO) {
                 throw ArithmeticException("Parent must not be 0")
             }
-            if (value < 0) {
-                children *= -1
+            if (value < BigInteger.ZERO) {
+                children *= (-1).toBigInteger()
             }
-            val gcd = getGCD(children, value)
-            if (gcd > 1) {
-                field = abs(value) / gcd
+            val gcd = value.gcd(children)
+            if (gcd > BigInteger.ONE) {
+                field = value.abs() / gcd
                 children /= gcd
             } else {
                 field = value
@@ -34,43 +34,48 @@ class MagicNumber {
     constructor()
 
     constructor(initValue: Long) {
-        children = initValue
+        children = initValue.toBigInteger()
     }
 
     constructor(initValue: Int) {
-        children = initValue.toLong()
+        children = initValue.toBigInteger()
     }
 
     constructor(initValue: Short) {
-        children = initValue.toLong()
+        children = initValue.toLong().toBigInteger()
     }
 
     constructor(initValue: Byte) {
-        children = initValue.toLong()
+        children = initValue.toLong().toBigInteger()
     }
 
     constructor(initValue: BigInteger) {
-        children = initValue.toLong()
+        children = initValue
     }
 
-    constructor(child: Long, parent: Long) {
+    constructor(child: BigInteger, parent: BigInteger){
         children = child
         this.parent = parent
     }
 
+    constructor(child: Long, parent: Long) {
+        children = child.toBigInteger()
+        this.parent = parent.toBigInteger()
+    }
+
     constructor(child: Int, parent: Int) {
-        children = child.toLong()
-        this.parent = parent.toLong()
+        children = child.toBigInteger()
+        this.parent = parent.toBigInteger()
     }
 
     constructor(child: Short, parent: Short) {
-        children = child.toLong()
-        this.parent = parent.toLong()
+        children = child.toLong().toBigInteger()
+        this.parent = parent.toLong().toBigInteger()
     }
 
     constructor(value: Double) {
         var value = value
-        var powerCount = 0L
+        var powerCount = 0
         do {
             if (powerCount > 1000) {
                 TODO("무한소수 대응 실패")
@@ -80,13 +85,13 @@ class MagicNumber {
             val longValue = value.toLong()
         } while (longValue.toDouble() != value)
 
-        children = value.toLong()
-        parent = pow(10, powerCount)
+        children = value.toBigDecimal().toBigInteger()
+        parent = BigInteger.TEN.pow(powerCount)
     }
 
     constructor(value: Float) {
         var value = value
-        var powerCount = 0L
+        var powerCount = 0
         do {
             if (powerCount > 1000) {
                 TODO("무한소수 대응 실패")
@@ -96,14 +101,14 @@ class MagicNumber {
             val longValue = value.toLong()
         } while (longValue.toFloat() != value)
 
-        children = value.toLong()
-        parent = pow(10, powerCount)
+        children = value.toBigDecimal().toBigInteger()
+        parent = BigInteger.TEN.pow(powerCount)
     }
 
     constructor(child: Double, parent: Double) {
         var varChild = child
         var varParent = parent
-        var powerCount = 0L
+        var powerCount = 0
         do {
             if (powerCount > 1000) {
                 TODO("무한소수 대응 실패")
@@ -114,14 +119,14 @@ class MagicNumber {
             val longChild = varChild.toLong()
             val longParent = varParent.toLong()
         } while (longChild.toDouble() != varChild || longParent.toDouble() != varParent)
-        this.children = varChild.toLong()
-        this.parent = varParent.toLong()
+        this.children = varChild.toLong().toBigInteger()
+        this.parent = varParent.toLong().toBigInteger()
     }
 
     constructor(child: Float, parent: Float) {
         var varChild = child
         var varParent = parent
-        var powerCount = 0L
+        var powerCount = 0
         do {
             if (powerCount > 1000) {
                 TODO("무한소수 대응 실패")
@@ -132,38 +137,36 @@ class MagicNumber {
             val longChild = varChild.toLong()
             val longParent = varParent.toLong()
         } while (longChild.toFloat() != varChild || longParent.toFloat() != varParent)
-        this.children = varChild.toLong()
-        this.parent = varParent.toLong()
+        this.children = varChild.toLong().toBigInteger()
+        this.parent = varParent.toLong().toBigInteger()
     }
 
     fun getAsDouble(): Double {
-        return children.toDouble() / parent.toDouble()
+        return (children.toBigDecimal() / parent.toBigDecimal()).toDouble()
     }
 
     fun getAsFloat(): Float {
-        return children.toFloat() / parent.toFloat()
+        return (children.toBigDecimal() / parent.toBigDecimal()).toFloat()
+    }
+
+    fun getAsBigDecimal(): BigDecimal {
+        return (children.toBigDecimal() / parent.toBigDecimal())
     }
 
     fun getAsLong(): Long {
-        return children / parent
+        return (children / parent).toLong()
     }
 
     fun getAsInt(): Int {
-        return children.toInt() / parent.toInt()
+        return (children / parent).toInt()
     }
 
-    private fun getGCD(a: Long, b: Long): Long {
-        val startNumber = min(abs(a), abs(b))
-        for (i in startNumber downTo 1) {
-            if (a % i == 0L && b % i == 0L) {
-                return i
-            }
-        }
-        return 1L
+    fun getAsBigInteger(): BigInteger {
+        return (children / parent)
     }
 
-    private fun getLCM(a: Long, b: Long): Long {
-        return (a * b) / getGCD(a, b)
+    private fun getLCM(a: BigInteger, b: BigInteger): BigInteger {
+        return (a * b) / a.gcd(b)
     }
 
     private fun pow(under: Long, up: Long): Long {
@@ -181,7 +184,7 @@ class MagicNumber {
     }
 
     operator fun plus(other: Long): MagicNumber {
-        val addChildren = this.parent * other
+        val addChildren = this.parent * other.toBigInteger()
         return MagicNumber(this.children + addChildren, this.parent)
     }
 
@@ -205,7 +208,7 @@ class MagicNumber {
     }
 
     operator fun minus(other: Long): MagicNumber {
-        val subChildren = this.parent * other
+        val subChildren = this.parent * other.toBigInteger()
         return MagicNumber(this.children - subChildren, this.parent)
     }
 
@@ -222,14 +225,14 @@ class MagicNumber {
     }
 
     operator fun times(other: MagicNumber): MagicNumber {
-        if (other.parent == 0L) {
+        if (other.parent == BigInteger.ZERO) {
             throw ArithmeticException("Parent must not be 0")
         }
         return MagicNumber(this.children * other.children, this.parent * other.parent)
     }
 
     operator fun times(other: Long): MagicNumber {
-        return MagicNumber(this.children * other, this.parent)
+        return MagicNumber(this.children * other.toBigInteger(), this.parent)
     }
 
     operator fun times(other: BigInteger): MagicNumber {
@@ -247,7 +250,7 @@ class MagicNumber {
     }
 
     operator fun div(other: MagicNumber): MagicNumber {
-        if (other.children == 0L) {
+        if (other.children == BigInteger.ZERO) {
             throw ArithmeticException("Division by zero is not allowed")
         }
         return MagicNumber(this.children * other.parent, this.parent * other.children)
@@ -257,7 +260,7 @@ class MagicNumber {
         if (other == 0L) {
             throw ArithmeticException("Division by zero is not allowed")
         }
-        return MagicNumber(this.children, this.parent * other)
+        return MagicNumber(this.children, this.parent * other.toBigInteger())
     }
 
     operator fun div(other: BigInteger): MagicNumber {
