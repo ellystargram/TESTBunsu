@@ -1,7 +1,6 @@
 import java.math.BigDecimal
 import java.math.BigInteger
-import kotlin.math.abs
-import kotlin.math.min
+import java.math.MathContext
 
 class MagicNumber {
     var children: BigInteger = BigInteger.ONE
@@ -53,7 +52,7 @@ class MagicNumber {
         children = initValue
     }
 
-    constructor(child: BigInteger, parent: BigInteger){
+    constructor(child: BigInteger, parent: BigInteger) {
         children = child
         this.parent = parent
     }
@@ -105,6 +104,22 @@ class MagicNumber {
         parent = BigInteger.TEN.pow(powerCount)
     }
 
+    constructor(value: BigDecimal) {
+        var value = value
+        var powerCount = 0
+        do {
+            if (powerCount > 1000) {
+                TODO("무한소수 대응 실패")
+            }
+            value *= BigDecimal.TEN
+            powerCount++
+            val bigIntegerValue = value.toBigInteger()
+        } while (bigIntegerValue.toBigDecimal().compareTo(value) != 0)
+
+        children = value.toBigInteger()
+        parent = BigInteger.TEN.pow(powerCount)
+    }
+
     constructor(child: Double, parent: Double) {
         var varChild = child
         var varParent = parent
@@ -142,27 +157,27 @@ class MagicNumber {
     }
 
     fun getAsDouble(): Double {
-        return (children.toBigDecimal() / parent.toBigDecimal()).toDouble()
+        return getAsBigDecimal().toDouble()
     }
 
     fun getAsFloat(): Float {
-        return (children.toBigDecimal() / parent.toBigDecimal()).toFloat()
+        return getAsBigDecimal().toFloat()
     }
 
     fun getAsBigDecimal(): BigDecimal {
-        return (children.toBigDecimal() / parent.toBigDecimal())
+        return children.toBigDecimal().divide(parent.toBigDecimal(), MathContext.DECIMAL128)
     }
 
     fun getAsLong(): Long {
-        return (children / parent).toLong()
+        return getAsBigDecimal().toLong()
     }
 
     fun getAsInt(): Int {
-        return (children / parent).toInt()
+        return getAsBigDecimal().toInt()
     }
 
     fun getAsBigInteger(): BigInteger {
-        return (children / parent)
+        return getAsBigDecimal().toBigInteger()
     }
 
     private fun getLCM(a: BigInteger, b: BigInteger): BigInteger {
@@ -264,7 +279,7 @@ class MagicNumber {
     }
 
     operator fun div(other: BigInteger): MagicNumber {
-        if (other.equals(0)){
+        if (other.equals(0)) {
             throw ArithmeticException("Division by zero is not allowed")
         }
         return this / other.toLong()
@@ -283,4 +298,5 @@ class MagicNumber {
         }
         return this / MagicNumber(other.toDouble())
     }
+
 }
